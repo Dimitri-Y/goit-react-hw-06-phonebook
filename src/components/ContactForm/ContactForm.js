@@ -1,5 +1,4 @@
 import css from './ContactForm.module.css';
-import PropTypes from 'prop-types';
 import * as Yup from 'yup';
 import { useDispatch } from 'react-redux';
 import { addContact } from '../../redux/contactsSlice';
