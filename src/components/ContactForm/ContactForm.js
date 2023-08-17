@@ -40,6 +40,9 @@ const ContactForm = () => {
     }
 
     dispatch(addContact(valueName, number));
+    const elements = event.target.elements;
+    elements.name.value = '';
+    elements.number.value = '';
   };
 
   return (
