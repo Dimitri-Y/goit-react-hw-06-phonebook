@@ -1,19 +1,27 @@
-import React, { useState } from 'react';
 import css from './ContactForm.module.css';
-import { nanoid } from 'nanoid';
 import PropTypes from 'prop-types';
-const ContactForm = ({ onSubmit }) => {
-  const [name, setName] = useState('');
-  const [number, setNumber] = useState('');
+import * as Yup from 'yup';
+import { useDispatch } from 'react-redux';
+import { addContact } from '../../redux/contactsSlice';
+import { useSelector } from 'react-redux';
+
+const userSchema = Yup.object().shape({
+  name: Yup.string().min(2).max(70).required(),
+  number: Yup.number().positive().integer().required(),
+});
+
+const ContactForm = () => {
+  const contacts = useSelector(state => state.contacts.contacts);
+  const dispatch = useDispatch();
 
   const handleChange = evt => {
     const { name, value } = evt.target;
     switch (name) {
       case 'name':
-        setName(value);
+        userSchema.name = value;
         break;
       case 'number':
-        setNumber(value);
+        userSchema.number = value;
         break;
       default:
         break;
@@ -22,15 +30,17 @@ const ContactForm = ({ onSubmit }) => {
 
   const handleSubmit = event => {
     event.preventDefault();
-    const contactData = {
-      name: name,
-      number: number,
-      id: nanoid(),
-    };
+    const { name: valueName, number } = userSchema;
 
-    onSubmit(contactData);
-    setName('');
-    setNumber('');
+    let isExist = contacts.some(
+      ({ name }) => name.toLowerCase() === valueName.toLowerCase()
+    );
+    if (isExist) {
+      alert(`${valueName} is already in contacts.`);
+      return;
+    }
+
+    dispatch(addContact(valueName, number));
   };
 
   return (
@@ -46,7 +56,7 @@ const ContactForm = ({ onSubmit }) => {
               pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
               title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
               required
-              value={name}
+              value={userSchema.name}
               onChange={handleChange}
             />
           </li>
@@ -58,7 +68,7 @@ const ContactForm = ({ onSubmit }) => {
               pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
               title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
               required
-              value={number}
+              value={userSchema.number}
               onChange={handleChange}
             />
           </li>
@@ -67,9 +77,6 @@ const ContactForm = ({ onSubmit }) => {
       </form>
     </div>
   );
-};
-ContactForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
 };
 
 export default ContactForm;
