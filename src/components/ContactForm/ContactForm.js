@@ -1,15 +1,12 @@
 import css from './ContactForm.module.css';
-import * as Yup from 'yup';
 import { useDispatch } from 'react-redux';
 import { addContact } from '../../redux/contactsSlice';
 import { useSelector } from 'react-redux';
-
-const userSchema = Yup.object().shape({
-  name: Yup.string().min(2).max(70).required(),
-  number: Yup.number().positive().integer().required(),
-});
+import { useState } from 'react';
 
 const ContactForm = () => {
+  const [name, setName] = useState('');
+  const [number, setNumber] = useState('');
   const contacts = useSelector(state => state.contacts.contacts);
   const dispatch = useDispatch();
 
@@ -17,10 +14,10 @@ const ContactForm = () => {
     const { name, value } = evt.target;
     switch (name) {
       case 'name':
-        userSchema.name = value;
+        setName(value);
         break;
       case 'number':
-        userSchema.number = value;
+        setNumber(value);
         break;
       default:
         break;
@@ -29,20 +26,15 @@ const ContactForm = () => {
 
   const handleSubmit = event => {
     event.preventDefault();
-    const { name: valueName, number } = userSchema;
-
-    let isExist = contacts.some(
-      ({ name }) => name.toLowerCase() === valueName.toLowerCase()
+    const isDuplicateName = contacts.some(
+      contact => String(contact.name).toLowerCase() === name.toLowerCase()
     );
-    if (isExist) {
-      alert(`${valueName} is already in contacts.`);
-      return;
+    if (isDuplicateName) {
+      return window.alert(`${name} is already in contacts!`);
     }
-
-    dispatch(addContact(valueName, number));
-    const elements = event.target.elements;
-    elements.name.value = '';
-    elements.number.value = '';
+    dispatch(addContact(name, number));
+    setName('');
+    setNumber('');
   };
 
   return (
@@ -58,7 +50,7 @@ const ContactForm = () => {
               pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
               title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
               required
-              value={userSchema.name}
+              value={name}
               onChange={handleChange}
             />
           </li>
@@ -70,7 +62,7 @@ const ContactForm = () => {
               pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
               title="Phone number must be digits and can contain spaces, dashes, parentheses and can start with +"
               required
-              value={userSchema.number}
+              value={number}
               onChange={handleChange}
             />
           </li>

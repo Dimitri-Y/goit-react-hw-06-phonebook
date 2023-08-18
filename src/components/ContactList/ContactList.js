@@ -2,6 +2,7 @@ import css from './ContactList.module.css';
 import { useDispatch } from 'react-redux';
 import { deleteContact } from '../../redux/contactsSlice';
 import { useSelector } from 'react-redux';
+
 const ContactList = () => {
   const dispatch = useDispatch();
   const contacts = useSelector(state => state.contacts.contacts);
@@ -9,9 +10,8 @@ const ContactList = () => {
 
   const countVisibleContacts = () =>
     contacts.filter(({ name }) =>
-      name.toLowerCase().includes(filter.toLowerCase())
+      name?.toLowerCase().includes(filter.toLowerCase())
     );
-
   const visibleContacts = countVisibleContacts();
   const handleDeleteContact = id => dispatch(deleteContact(id));
 
@@ -25,7 +25,7 @@ const ContactList = () => {
           <button
             className={css['button']}
             id={contact.id}
-            onClick={handleDeleteContact}
+            onClick={() => handleDeleteContact(contact.id)}
           >
             Delete
           </button>
